@@ -3,16 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JPG to PDF Converter</title>
+    <title>Image Tools</title>
     <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </head>
 <body>
-    <h1>Convert JPG to PDF</h1>
-    <form id="uploadForm">
-        <input type="file" id="fileInput" multiple accept="image/jpeg">
-        <button type="submit">Convert</button>
-    </form>
-    <div id="output"></div>
+    <div class="container">
+        <h1>Image Tools</h1>
+        <form id="uploadForm">
+            <label for="fileInput"><i class="fas fa-file-upload"></i> Choose Files</label>
+            <input type="file" id="fileInput" multiple accept="image/*">
+            <label for="compressionFormat">Compression Format:</label>
+            <select id="compressionFormat">
+                <option value="JPEG">JPEG</option>
+                <option value="PNG">PNG</option>
+                <option value="WEBP">WEBP</option>
+            </select>
+            <label for="cropWidth">Crop Width:</label>
+            <input type="number" id="cropWidth" placeholder="Width">
+            <label for="cropHeight">Crop Height:</label>
+            <input type="number" id="cropHeight" placeholder="Height">
+            <button type="submit"><i class="fas fa-file-upload"></i> Process</button>
+        </form>
+        <div id="output"></div>
+    </div>
     <script src="../static/script.js"></script>
 </body>
 </html>
