@@ -2,14 +2,14 @@ $(document).ready(function() {
     $('#operationType').change(function() {
         const operation = $(this).val();
         if (operation === 'compress') {
-            $('#compressionOptions').show();
-            $('#cropOptions').hide();
+            $('#compressionOptions').removeClass('d-none');
+            $('#cropOptions').addClass('d-none');
         } else if (operation === 'crop') {
-            $('#compressionOptions').hide();
-            $('#cropOptions').show();
+            $('#compressionOptions').addClass('d-none');
+            $('#cropOptions').removeClass('d-none');
         } else {
-            $('#compressionOptions').hide();
-            $('#cropOptions').hide();
+            $('#compressionOptions').addClass('d-none');
+            $('#cropOptions').addClass('d-none');
         }
     });
 
@@ -56,4 +56,3 @@ $(document).ready(function() {
         }
     });
 });
-

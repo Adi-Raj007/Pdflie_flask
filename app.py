@@ -1,9 +1,10 @@
-from flask import Flask, request, send_file, render_template
+from flask import Flask, request, send_file, render_template, flash, redirect, url_for
 from PIL import Image
 import img2pdf
 import io
 
 app = Flask(__name__)
+app.secret_key = 'supersecretkey'  # Necessary for flash messages
 
 @app.route('/')
 def index():
@@ -14,7 +15,8 @@ def process():
     try:
         files = request.files.getlist('files')
         if not files:
-            return 'No files provided', 400
+            flash('No files provided', 'danger')
+            return redirect(url_for('index'))
 
         operation = request.form.get('operation')
         compression_format = request.form.get('compressionFormat')
@@ -32,6 +34,8 @@ def process():
             images = []
             for file in files:
                 img = Image.open(file)
+                if img.mode == 'RGBA':
+                    img = img.convert('RGB')
                 img_byte_arr = io.BytesIO()
                 img.save(img_byte_arr, format=compression_format, quality=quality)
                 img_byte_arr = img_byte_arr.getvalue()
@@ -64,6 +68,8 @@ def process():
                 right = (img_width + crop_width) / 2
                 bottom = (img_height + crop_height) / 2
                 img = img.crop((left, top, right, bottom))
+                if img.mode == 'RGBA':
+                    img = img.convert('RGB')
                 img_byte_arr = io.BytesIO()
                 img.save(img_byte_arr, format=compression_format)
                 img_byte_arr = img_byte_arr.getvalue()
@@ -79,7 +85,8 @@ def process():
 
         return 'Invalid operation', 400
     except Exception as e:
-        return str(e), 500
+        flash(f'Error: {str(e)}', 'danger')
+        return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)

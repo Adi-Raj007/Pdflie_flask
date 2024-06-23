@@ -1,5 +1,7 @@
 Flask
+Flask-Login
+Flask-WTF
+Flask-Flash
 Pillow
 img2pdf
 gunicorn
-
