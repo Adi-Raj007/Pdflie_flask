@@ -16,29 +16,70 @@ def process():
         if not files:
             return 'No files provided', 400
 
-        compression_format = request.form.get('compressionFormat', 'JPEG')
-        crop_width = request.form.get('cropWidth')
-        crop_height = request.form.get('cropHeight')
+        operation = request.form.get('operation')
+        compression_format = request.form.get('compressionFormat')
+        compression_quality = request.form.get('compressionQuality')
+        crop_ratio = request.form.get('cropRatio')
 
-        images = []
-        for file in files:
-            img = Image.open(file)
-            if crop_width and crop_height:
-                crop_width = int(crop_width)
-                crop_height = int(crop_height)
-                img = img.crop((0, 0, crop_width, crop_height))
-            img_byte_arr = io.BytesIO()
-            img.save(img_byte_arr, format=compression_format)
-            img_byte_arr = img_byte_arr.getvalue()
-            images.append(img_byte_arr)
+        if operation == 'jpgToPdf':
+            images = [file.read() for file in files]
+            pdf_bytes = img2pdf.convert(images)
+            pdf_io = io.BytesIO(pdf_bytes)
+            return send_file(pdf_io, mimetype='application/pdf', as_attachment=True, download_name='output.pdf')
 
-        pdf_bytes = img2pdf.convert(images)
-        pdf_io = io.BytesIO(pdf_bytes)
+        elif operation == 'compress':
+            quality = int(compression_quality)
+            images = []
+            for file in files:
+                img = Image.open(file)
+                img_byte_arr = io.BytesIO()
+                img.save(img_byte_arr, format=compression_format, quality=quality)
+                img_byte_arr = img_byte_arr.getvalue()
+                images.append(img_byte_arr)
+            if len(images) == 1:
+                img_io = io.BytesIO(images[0])
+                img_io.seek(0)
+                return send_file(img_io, mimetype=f'image/{compression_format.lower()}', as_attachment=True, download_name=f'output.{compression_format.lower()}')
+            else:
+                pdf_bytes = img2pdf.convert(images)
+                pdf_io = io.BytesIO(pdf_bytes)
+                return send_file(pdf_io, mimetype='application/pdf', as_attachment=True, download_name='output.pdf')
 
-        return send_file(pdf_io, mimetype='application/pdf', as_attachment=True, download_name='output.pdf')
+        elif operation == 'crop':
+            ratio_map = {
+                '1:1': (1, 1),
+                '3:2': (3, 2),
+                '4:3': (4, 3),
+                '16:9': (16, 9)
+            }
+            width_ratio, height_ratio = ratio_map[crop_ratio]
+            images = []
+            for file in files:
+                img = Image.open(file)
+                img_width, img_height = img.size
+                crop_width = min(img_width, img_height * width_ratio / height_ratio)
+                crop_height = min(img_height, img_width * height_ratio / width_ratio)
+                left = (img_width - crop_width) / 2
+                top = (img_height - crop_height) / 2
+                right = (img_width + crop_width) / 2
+                bottom = (img_height + crop_height) / 2
+                img = img.crop((left, top, right, bottom))
+                img_byte_arr = io.BytesIO()
+                img.save(img_byte_arr, format=compression_format)
+                img_byte_arr = img_byte_arr.getvalue()
+                images.append(img_byte_arr)
+            if len(images) == 1:
+                img_io = io.BytesIO(images[0])
+                img_io.seek(0)
+                return send_file(img_io, mimetype=f'image/{compression_format.lower()}', as_attachment=True, download_name=f'output.{compression_format.lower()}')
+            else:
+                pdf_bytes = img2pdf.convert(images)
+                pdf_io = io.BytesIO(pdf_bytes)
+                return send_file(pdf_io, mimetype='application/pdf', as_attachment=True, download_name='output.pdf')
+
+        return 'Invalid operation', 400
     except Exception as e:
         return str(e), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
-

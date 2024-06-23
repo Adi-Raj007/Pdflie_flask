@@ -1,4 +1,18 @@
 $(document).ready(function() {
+    $('#operationType').change(function() {
+        const operation = $(this).val();
+        if (operation === 'compress') {
+            $('#compressionOptions').show();
+            $('#cropOptions').hide();
+        } else if (operation === 'crop') {
+            $('#compressionOptions').hide();
+            $('#cropOptions').show();
+        } else {
+            $('#compressionOptions').hide();
+            $('#cropOptions').hide();
+        }
+    });
+
     $('#fileInput').change(function() {
         let files = $(this).prop('files');
         if (files.length > 0) {
@@ -13,9 +27,10 @@ $(document).ready(function() {
         for (const file of files) {
             formData.append('files', file);
         }
+        formData.append('operation', $('#operationType').val());
         formData.append('compressionFormat', $('#compressionFormat').val());
-        formData.append('cropWidth', $('#cropWidth').val());
-        formData.append('cropHeight', $('#cropHeight').val());
+        formData.append('compressionQuality', $('#compressionQuality').val());
+        formData.append('cropRatio', $('#cropRatio').val());
 
         const response = await fetch('/process', {
             method: 'POST',
@@ -29,7 +44,7 @@ $(document).ready(function() {
             if (fileName) {
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `${fileName}.${$('#compressionFormat').val().toLowerCase()}`;
+                link.download = `${fileName}.${$('#operationType').val() === 'jpgToPdf' ? 'pdf' : $('#compressionFormat').val().toLowerCase()}`;
                 $('#output').html(link);
                 link.click();
             }

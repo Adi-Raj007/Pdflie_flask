@@ -27,7 +27,7 @@ form {
     margin-bottom: 20px;
 }
 
-input[type="file"], input[type="number"], select {
+input[type="file"], select {
     display: block;
     margin: 10px auto;
     padding: 10px;
@@ -81,4 +81,3 @@ button:hover {
 #output a:hover {
     color: #0056b3;
 }
-
